@@ -1,4 +1,4 @@
-# NGS demultiplex and preprocessing script, KG Vejle
+# NGS demultiplex, preprocessing and automatic germline NGS script, KG Vejle
 
 ## General info:
 This scripts requires at least 3 options: Path to runfolder, path to a samplesheet, and at least --DNA or --RNA parameter.
@@ -6,14 +6,15 @@ There is no need to manually edit the samplesheet: The script will automatically
 
 PLEASE NOTE: The script will automatically perform preprocesssing and alignment of DNA samples. Fastq and aligned CRAM files will automatically be transferred to the long term storage location. This means no Fastq or aligned CRAM files will be found where the script is executed - only in the long term storage (dataArchive) location.
 
-The resulting CRAM files will be available from the data archive location from each server as read-only locations:
-../dataArchive/tank_kga_external_archive/alignedData/{genomeversion}/novaRuns/runfolder
+The resulting CRAM files will be available from the data archive location from each server as read-only files and folders.
+A folder with symlinks to the CRAM files will be created at the "results" folder, and in the "variants" folder.
 
-The resulting FastQ files will be available from the data archive location from each server as read-only locations:
-../dataArchive/tank_kga_external_archive/fastq_storage/novaRuns/runfolder
+The resulting FastQ files will be available from the data archive location from each server as read-only files. Please note: FastQ files are regularly compressed to spring format, and subsequently deleted.
 
 Data can be stored locally in the folder where the script is started instead by using the --localStorage option
 
 By default, hg38 (v3) is used for alignment!
+
+The scripts performs the same steps as the germlineNGS script (variant calling etc), if run in full pipeline mode (default)
 
 Run the script with --help to see available options and default settings.
