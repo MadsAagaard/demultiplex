@@ -272,39 +272,40 @@ workflow {
     }
 }
 
+if (params.server=="lnx02") {
+    workflow.onComplete {
 
-workflow.onComplete {
+        // Extract the first six digits from the samplesheet name
+        def samplesheetName = new File(params.samplesheet).getName()
+        def samplesheetDate = samplesheetName.find(/\d{6}/)
 
-    // Extract the first six digits from the samplesheet name
-    def samplesheetName = new File(params.samplesheet).getName()
-    def samplesheetDate = samplesheetName.find(/\d{6}/)
-
-    // Only send email if --nomail is not specified, duration is longer than 20 minutes, the script executed succesfully, and if the user is mmaj or raspau.
-    if (!params.nomail && workflow.duration > 1200000 && workflow.success) {
-        if (System.getenv("USER") in ["raspau", "mmaj"]) {
-            
-            def workDirMessage = params.keepwork ? "WorkDir             : ${workflow.workDir}" : "WorkDir             : Deleted"
-            
-            def body = """\
-            Pipeline execution summary
-            ---------------------------
-            Demultiplexing of sequencing run: ${samplesheetDate}
-            Duration            : ${workflow.duration}
-            Success             : ${workflow.success}
-            ${workDirMessage}
-            OutputDir           : ${params.outdir ?: 'Not specified'}
-            Exit status         : ${workflow.exitStatus}
-            """.stripIndent()
+        // Only send email if --nomail is not specified, duration is longer than 20 minutes, the script executed succesfully, and if the user is mmaj or raspau.
+        if (!params.nomail && workflow.duration > 1200000 && workflow.success) {
+            if (System.getenv("USER") in ["raspau", "mmaj"]) {
+                
+                def workDirMessage = params.keepwork ? "WorkDir             : ${workflow.workDir}" : "WorkDir             : Deleted"
+                
+                def body = """\
+                Pipeline execution summary
+                ---------------------------
+                Demultiplexing of sequencing run: ${samplesheetDate}
+                Duration            : ${workflow.duration}
+                Success             : ${workflow.success}
+                ${workDirMessage}
+                OutputDir           : ${params.outdir ?: 'Not specified'}
+                Exit status         : ${workflow.exitStatus}
+                """.stripIndent()
 
 
-            // Send email using the built-in sendMail function
-            sendMail(to: 'Mads.Jorgensen@rsyd.dk,Rasmus.Hojrup.Pausgaard@rsyd.dk', subject: 'Demultiplexing pipeline Update', body: body)
+                // Send email using the built-in sendMail function
+                sendMail(to: 'Mads.Jorgensen@rsyd.dk,Rasmus.Hojrup.Pausgaard@rsyd.dk', subject: 'Demultiplexing pipeline Update', body: body)
+            }
         }
-    }
 
-    // Handle deletion of WorkDir based on --keepwork parameter
-    if (!params.keepwork && workflow.duration > 1200000 && workflow.success) {
-        println("Deleting work directory: ${workflow.workDir}")
-        "rm -rf ${workflow.workDir}".execute()
+        // Handle deletion of WorkDir based on --keepwork parameter
+        if (!params.keepwork && workflow.duration > 1200000 && workflow.success) {
+            println("Deleting work directory: ${workflow.workDir}")
+            "rm -rf ${workflow.workDir}".execute()
+        }
     }
 }
